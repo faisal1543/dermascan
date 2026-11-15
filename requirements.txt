@@ -1,6 +1,6 @@
 # Full environment (training + app). Pin exact versions in W2 once everyone's setup works:
 #   pip freeze > requirements.lock.txt
-# On Daeta's laptop install the CUDA build of PyTorch first (see pytorch.org), then the rest.
+# With an NVIDIA GPU, install the CUDA build of PyTorch first (see pytorch.org), then the rest.
 torch
 torchvision
 timm

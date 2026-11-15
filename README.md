@@ -1,6 +1,6 @@
 # DermaScan — Human-in-the-Loop Cognitive Triage Assistant
 
-SCSE3103 Cognitive Computing · Group XX · Semester 1, 2026/2027
+SCSE3103 Cognitive Computing · Group Bravo · Semester 1, 2026/2027
 
 DermaScan turns a dermoscopic image into a triage recommendation (urgent / routine / monitor)
 with a visible explanation. A CNN perceives the lesion, a fuzzy-logic layer reasons over the
