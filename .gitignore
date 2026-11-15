@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# Data: HAM10000 is CC BY-NC 4.0; download it locally, never commit it
+data/*
+!data/README.md
+subset_images/
+*.zip
+HAM10000_images*/
+
+# Large model files (share via GitHub Releases or Git LFS instead)
+*.pt
+*.pth
+*.onnx
+
+# Runtime / secrets
+.env
+*.db
+logs/
+results/**/*.pt
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

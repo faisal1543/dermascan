@@ -1,0 +1,10 @@
+# Light dependencies for CI (no PyTorch, so CI stays fast)
+numpy
+pandas
+scikit-learn
+scikit-fuzzy
+pillow
+fastapi
+python-multipart
+httpx
+pytest
