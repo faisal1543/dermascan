@@ -1,0 +1,308 @@
+[
+  {
+    "case": "clear_melanoma",
+    "expected": "urgent",
+    "c2": {
+      "urgency": "urgent",
+      "score": 84.5,
+      "inputs": {
+        "p_malignant": 0.87,
+        "p_mel": 0.85,
+        "entropy": 0.3236,
+        "age": 64.0,
+        "site": "back"
+      },
+      "fired_rules": [
+        {
+          "id": "F2",
+          "kind": "floor",
+          "text": "IF melanoma is high THEN urgency is at least urgent",
+          "explanation": "Strong melanoma evidence is always urgent, whatever the other factors.",
+          "strength": 1.0,
+          "applied": true
+        },
+        {
+          "id": "R1",
+          "kind": "score",
+          "text": "IF melanoma is high THEN urgent",
+          "explanation": "Strong melanoma evidence: suspected-cancer referral.",
+          "strength": 1.0
+        }
+      ],
+      "rules_version": "fuzzy-v0.1-draft"
+    }
+  },
+  {
+    "case": "clear_nevus",
+    "expected": "monitor",
+    "c2": {
+      "urgency": "monitor",
+      "score": 15.5,
+      "inputs": {
+        "p_malignant": 0.03,
+        "p_mel": 0.02,
+        "entropy": 0.2003,
+        "age": 30.0,
+        "site": "trunk"
+      },
+      "fired_rules": [
+        {
+          "id": "R5",
+          "kind": "score",
+          "text": "IF malignancy is low THEN monitor",
+          "explanation": "Little evidence of skin cancer: GP follow-up.",
+          "strength": 1.0
+        }
+      ],
+      "rules_version": "fuzzy-v0.1-draft"
+    }
+  },
+  {
+    "case": "bcc_on_back",
+    "expected": "routine",
+    "c2": {
+      "urgency": "routine",
+      "score": 50.0,
+      "inputs": {
+        "p_malignant": 0.8,
+        "p_mel": 0.02,
+        "entropy": 0.4746,
+        "age": 70.0,
+        "site": "back"
+      },
+      "fired_rules": [
+        {
+          "id": "R3",
+          "kind": "score",
+          "text": "IF malignancy is high AND melanoma is low THEN routine",
+          "explanation": "Strong evidence of a non-melanoma skin cancer (such as basal cell carcinoma): non-urgent referral.",
+          "strength": 1.0
+        }
+      ],
+      "rules_version": "fuzzy-v0.1-draft"
+    }
+  },
+  {
+    "case": "bcc_on_face",
+    "expected": "urgent",
+    "c2": {
+      "urgency": "urgent",
+      "score": 65.0,
+      "inputs": {
+        "p_malignant": 0.8,
+        "p_mel": 0.02,
+        "entropy": 0.4746,
+        "age": 70.0,
+        "site": "face"
+      },
+      "fired_rules": [
+        {
+          "id": "F4",
+          "kind": "floor",
+          "text": "IF malignancy is high AND site is head or neck THEN urgency is at least urgent",
+          "explanation": "Likely skin cancer on the head or neck, where a delay can matter more: suspected-cancer referral.",
+          "strength": 1.0,
+          "applied": true
+        },
+        {
+          "id": "R3",
+          "kind": "score",
+          "text": "IF malignancy is high AND melanoma is low THEN routine",
+          "explanation": "Strong evidence of a non-melanoma skin cancer (such as basal cell carcinoma): non-urgent referral.",
+          "strength": 1.0
+        }
+      ],
+      "rules_version": "fuzzy-v0.1-draft"
+    }
+  },
+  {
+    "case": "borderline_melanoma_young",
+    "expected": "routine",
+    "c2": {
+      "urgency": "routine",
+      "score": 50.0,
+      "inputs": {
+        "p_malignant": 0.4,
+        "p_mel": 0.35,
+        "entropy": 0.6624,
+        "age": 28.0,
+        "site": "lower extremity"
+      },
+      "fired_rules": [
+        {
+          "id": "R2",
+          "kind": "score",
+          "text": "IF melanoma is medium THEN routine",
+          "explanation": "Some melanoma evidence: specialist review recommended.",
+          "strength": 1.0
+        },
+        {
+          "id": "F1",
+          "kind": "floor",
+          "text": "IF uncertainty is high THEN urgency is at least routine",
+          "explanation": "The model is unsure about this image, so it is not left to GP follow-up.",
+          "strength": 0.562,
+          "applied": true
+        }
+      ],
+      "rules_version": "fuzzy-v0.1-draft"
+    }
+  },
+  {
+    "case": "borderline_melanoma_older",
+    "expected": "urgent",
+    "c2": {
+      "urgency": "urgent",
+      "score": 65.0,
+      "inputs": {
+        "p_malignant": 0.4,
+        "p_mel": 0.35,
+        "entropy": 0.6624,
+        "age": 72.0,
+        "site": "lower extremity"
+      },
+      "fired_rules": [
+        {
+          "id": "F3",
+          "kind": "floor",
+          "text": "IF melanoma is medium AND age is older THEN urgency is at least urgent",
+          "explanation": "Some melanoma evidence in an older patient: suspected-cancer referral.",
+          "strength": 1.0,
+          "applied": true
+        },
+        {
+          "id": "R2",
+          "kind": "score",
+          "text": "IF melanoma is medium THEN routine",
+          "explanation": "Some melanoma evidence: specialist review recommended.",
+          "strength": 1.0
+        },
+        {
+          "id": "F1",
+          "kind": "floor",
+          "text": "IF uncertainty is high THEN urgency is at least routine",
+          "explanation": "The model is unsure about this image, so it is not left to GP follow-up.",
+          "strength": 0.562,
+          "applied": true
+        }
+      ],
+      "rules_version": "fuzzy-v0.1-draft"
+    }
+  },
+  {
+    "case": "uncertain_benign",
+    "expected": "routine",
+    "c2": {
+      "urgency": "routine",
+      "score": 35.0,
+      "inputs": {
+        "p_malignant": 0.17,
+        "p_mel": 0.07,
+        "entropy": 0.8372,
+        "age": 45.0,
+        "site": "chest"
+      },
+      "fired_rules": [
+        {
+          "id": "F1",
+          "kind": "floor",
+          "text": "IF uncertainty is high THEN urgency is at least routine",
+          "explanation": "The model is unsure about this image, so it is not left to GP follow-up.",
+          "strength": 1.0,
+          "applied": true
+        },
+        {
+          "id": "R5",
+          "kind": "score",
+          "text": "IF malignancy is low THEN monitor",
+          "explanation": "Little evidence of skin cancer: GP follow-up.",
+          "strength": 0.9
+        }
+      ],
+      "rules_version": "fuzzy-v0.1-draft"
+    }
+  },
+  {
+    "case": "borderline_melanoma_missing_age_and_site",
+    "expected": "routine",
+    "c2": {
+      "urgency": "routine",
+      "score": 50.0,
+      "inputs": {
+        "p_malignant": 0.4,
+        "p_mel": 0.35,
+        "entropy": 0.6624,
+        "age": null,
+        "site": "unknown"
+      },
+      "fired_rules": [
+        {
+          "id": "R2",
+          "kind": "score",
+          "text": "IF melanoma is medium THEN routine",
+          "explanation": "Some melanoma evidence: specialist review recommended.",
+          "strength": 1.0
+        },
+        {
+          "id": "F1",
+          "kind": "floor",
+          "text": "IF uncertainty is high THEN urgency is at least routine",
+          "explanation": "The model is unsure about this image, so it is not left to GP follow-up.",
+          "strength": 0.562,
+          "applied": true
+        }
+      ],
+      "rules_version": "fuzzy-v0.1-draft"
+    }
+  },
+  {
+    "case": "out_of_distribution_photo",
+    "expected": "cannot_assess",
+    "c2": {
+      "urgency": "cannot_assess",
+      "score": null,
+      "inputs": {
+        "p_malignant": 0.4,
+        "p_mel": 0.2,
+        "entropy": 0.9696,
+        "age": 50.0,
+        "site": "hand"
+      },
+      "fired_rules": [
+        {
+          "id": "G1",
+          "kind": "gate",
+          "text": "IF the image failed validation or the out-of-distribution check THEN cannot assess",
+          "explanation": "This image could not be assessed reliably. Refer for specialist review.",
+          "strength": 1.0
+        }
+      ],
+      "rules_version": "fuzzy-v0.1-draft"
+    }
+  },
+  {
+    "case": "benign_keratosis_on_face",
+    "expected": "monitor",
+    "c2": {
+      "urgency": "monitor",
+      "score": 15.5,
+      "inputs": {
+        "p_malignant": 0.06,
+        "p_mel": 0.02,
+        "entropy": 0.3878,
+        "age": 66.0,
+        "site": "face"
+      },
+      "fired_rules": [
+        {
+          "id": "R5",
+          "kind": "score",
+          "text": "IF malignancy is low THEN monitor",
+          "explanation": "Little evidence of skin cancer: GP follow-up.",
+          "strength": 1.0
+        }
+      ],
+      "rules_version": "fuzzy-v0.1-draft"
+    }
+  }
+]

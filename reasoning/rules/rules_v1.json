@@ -1,0 +1,157 @@
+{
+  "version": "fuzzy-v0.1-draft",
+  "status": "DRAFT for the W2 meeting. All breakpoints are placeholders, to be tuned on the validation split only (DERM-27, Ground rule 3). Design rationale: docs/fuzzy-design.md.",
+  "inputs": {
+    "melanoma": {
+      "c1_field": "prob_mel",
+      "universe": [0, 1],
+      "terms": {
+        "low": {"shape": "trap", "params": [0, 0, 0.10, 0.25]},
+        "medium": {"shape": "tri", "params": [0.15, 0.35, 0.55]},
+        "high": {"shape": "trap", "params": [0.40, 0.60, 1, 1]}
+      }
+    },
+    "malignancy": {
+      "c1_field": "p_malignant",
+      "universe": [0, 1],
+      "terms": {
+        "low": {"shape": "trap", "params": [0, 0, 0.15, 0.35]},
+        "medium": {"shape": "tri", "params": [0.20, 0.45, 0.70]},
+        "high": {"shape": "trap", "params": [0.55, 0.80, 1, 1]}
+      }
+    },
+    "uncertainty": {
+      "c1_field": "entropy",
+      "universe": [0, 1],
+      "terms": {
+        "low": {"shape": "trap", "params": [0, 0, 0.25, 0.45]},
+        "medium": {"shape": "tri", "params": [0.30, 0.50, 0.70]},
+        "high": {"shape": "trap", "params": [0.55, 0.75, 1, 1]}
+      }
+    },
+    "age": {
+      "request_field": "age",
+      "universe": [0, 120],
+      "missing": "unknown: membership 0 in every term, so no rule using age fires",
+      "terms": {
+        "young": {"shape": "trap", "params": [0, 0, 30, 45]},
+        "middle": {"shape": "tri", "params": [35, 50, 65]},
+        "older": {"shape": "trap", "params": [55, 70, 120, 120]}
+      }
+    },
+    "site": {
+      "request_field": "site",
+      "categorical": true,
+      "missing": "unknown: membership 0 in every group, so no rule using site fires",
+      "groups": {
+        "head_neck": ["face", "ear", "scalp", "neck"],
+        "other": ["abdomen", "acral", "back", "chest", "foot", "genital", "hand", "lower extremity", "trunk", "upper extremity"]
+      }
+    }
+  },
+  "output": {
+    "name": "urgency",
+    "universe": [0, 100],
+    "terms": {
+      "monitor": {"shape": "trap", "params": [0, 0, 20, 40]},
+      "routine": {"shape": "tri", "params": [30, 50, 70]},
+      "urgent": {"shape": "trap", "params": [60, 80, 100, 100]}
+    },
+    "categories": [
+      {"name": "monitor", "min_score": 0},
+      {"name": "routine", "min_score": 35},
+      {"name": "urgent", "min_score": 65}
+    ],
+    "floor_threshold": 0.5
+  },
+  "rules": [
+    {
+      "id": "G1",
+      "kind": "gate",
+      "text": "IF the image failed validation or the out-of-distribution check THEN cannot assess",
+      "explanation": "This image could not be assessed reliably. Refer for specialist review.",
+      "source": "Proposal Section 3 (out-of-distribution check; Lee et al., 2018); objective O3"
+    },
+    {
+      "id": "R1",
+      "kind": "score",
+      "if": [["melanoma", "high"]],
+      "then": "urgent",
+      "text": "IF melanoma is high THEN urgent",
+      "explanation": "Strong melanoma evidence: suspected-cancer referral.",
+      "source": "NICE NG12 rec. 1.7.2 (refer on a suspected cancer pathway if dermoscopy suggests melanoma)"
+    },
+    {
+      "id": "R2",
+      "kind": "score",
+      "if": [["melanoma", "medium"]],
+      "then": "routine",
+      "text": "IF melanoma is medium THEN routine",
+      "explanation": "Some melanoma evidence: specialist review recommended.",
+      "source": "NICE NG12 rec. 1.7.2 applied to borderline evidence; escalated by F3. Tuning knob for objective O2"
+    },
+    {
+      "id": "R3",
+      "kind": "score",
+      "if": [["malignancy", "high"], ["melanoma", "low"]],
+      "then": "routine",
+      "text": "IF malignancy is high AND melanoma is low THEN routine",
+      "explanation": "Strong evidence of a non-melanoma skin cancer (such as basal cell carcinoma): non-urgent referral.",
+      "source": "NICE NG12 rec. 1.7.5 (BCC: non-urgent referral) and 1.7.4 (SCC)"
+    },
+    {
+      "id": "R4",
+      "kind": "score",
+      "if": [["malignancy", "medium"], ["melanoma", "low"]],
+      "then": "routine",
+      "text": "IF malignancy is medium AND melanoma is low THEN routine",
+      "explanation": "Some evidence of a non-melanoma skin cancer: non-urgent referral.",
+      "source": "NICE NG12 rec. 1.7.5 (a lesion that raises the suspicion of BCC is referred)"
+    },
+    {
+      "id": "R5",
+      "kind": "score",
+      "if": [["malignancy", "low"]],
+      "then": "monitor",
+      "text": "IF malignancy is low THEN monitor",
+      "explanation": "Little evidence of skin cancer: GP follow-up.",
+      "source": "Proposal Section 2 (monitor = GP follow-up)"
+    },
+    {
+      "id": "F1",
+      "kind": "floor",
+      "if": [["uncertainty", "high"]],
+      "at_least": "routine",
+      "text": "IF uncertainty is high THEN urgency is at least routine",
+      "explanation": "The model is unsure about this image, so it is not left to GP follow-up.",
+      "source": "Proposal Section 3; Tschandl et al. (2020): unreliable AI advice misleads clinicians"
+    },
+    {
+      "id": "F2",
+      "kind": "floor",
+      "if": [["melanoma", "high"]],
+      "at_least": "urgent",
+      "text": "IF melanoma is high THEN urgency is at least urgent",
+      "explanation": "Strong melanoma evidence is always urgent, whatever the other factors.",
+      "source": "NICE NG12 rec. 1.7.2; objective O2 (at least 85% of melanomas urgent)"
+    },
+    {
+      "id": "F3",
+      "kind": "floor",
+      "if": [["melanoma", "medium"], ["age", "older"]],
+      "at_least": "urgent",
+      "text": "IF melanoma is medium AND age is older THEN urgency is at least urgent",
+      "explanation": "Some melanoma evidence in an older patient: suspected-cancer referral.",
+      "source": "NICE NG12 rec. 1.7.2; age as a risk factor (HAM10000 EDA: median age melanoma 60 vs nevus 45, to confirm on the train split)"
+    },
+    {
+      "id": "F4",
+      "kind": "floor",
+      "if": [["malignancy", "high"], ["site", "head_neck"]],
+      "at_least": "urgent",
+      "text": "IF malignancy is high AND site is head or neck THEN urgency is at least urgent",
+      "explanation": "Likely skin cancer on the head or neck, where a delay can matter more: suspected-cancer referral.",
+      "source": "NICE NG12 rec. 1.7.6 (BCC: suspected cancer pathway if delay may have a significant impact, e.g. lesion site)"
+    }
+  ]
+}

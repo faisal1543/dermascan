@@ -1,0 +1,25 @@
+{
+  "note": "DERM-12: made-up CNN outputs (contract C1 JSON form) for the fuzzy prototype. Not real patients or real model outputs. 'expected' is the urgency the draft rules are designed to give.",
+  "cases": [
+    {"case": "clear_melanoma", "age": 64, "site": "back", "expected": "urgent",
+     "c1": {"image_id": "fake_01", "probs": {"akiec": 0.01, "bcc": 0.01, "bkl": 0.03, "df": 0.01, "mel": 0.85, "nv": 0.08, "vasc": 0.01}}},
+    {"case": "clear_nevus", "age": 30, "site": "trunk", "expected": "monitor",
+     "c1": {"image_id": "fake_02", "probs": {"akiec": 0.005, "bcc": 0.005, "bkl": 0.04, "df": 0.005, "mel": 0.02, "nv": 0.92, "vasc": 0.005}}},
+    {"case": "bcc_on_back", "age": 70, "site": "back", "expected": "routine",
+     "c1": {"image_id": "fake_03", "probs": {"akiec": 0.03, "bcc": 0.75, "bkl": 0.10, "df": 0.01, "mel": 0.02, "nv": 0.08, "vasc": 0.01}}},
+    {"case": "bcc_on_face", "age": 70, "site": "face", "expected": "urgent",
+     "c1": {"image_id": "fake_04", "probs": {"akiec": 0.03, "bcc": 0.75, "bkl": 0.10, "df": 0.01, "mel": 0.02, "nv": 0.08, "vasc": 0.01}}},
+    {"case": "borderline_melanoma_young", "age": 28, "site": "lower extremity", "expected": "routine",
+     "c1": {"image_id": "fake_05", "probs": {"akiec": 0.02, "bcc": 0.03, "bkl": 0.12, "df": 0.02, "mel": 0.35, "nv": 0.45, "vasc": 0.01}}},
+    {"case": "borderline_melanoma_older", "age": 72, "site": "lower extremity", "expected": "urgent",
+     "c1": {"image_id": "fake_06", "probs": {"akiec": 0.02, "bcc": 0.03, "bkl": 0.12, "df": 0.02, "mel": 0.35, "nv": 0.45, "vasc": 0.01}}},
+    {"case": "uncertain_benign", "age": 45, "site": "chest", "expected": "routine",
+     "c1": {"image_id": "fake_07", "probs": {"akiec": 0.04, "bcc": 0.06, "bkl": 0.25, "df": 0.10, "mel": 0.07, "nv": 0.40, "vasc": 0.08}}},
+    {"case": "borderline_melanoma_missing_age_and_site", "age": null, "site": "unknown", "expected": "routine",
+     "c1": {"image_id": "fake_08", "probs": {"akiec": 0.02, "bcc": 0.03, "bkl": 0.12, "df": 0.02, "mel": 0.35, "nv": 0.45, "vasc": 0.01}}},
+    {"case": "out_of_distribution_photo", "age": 50, "site": "hand", "expected": "cannot_assess",
+     "c1": {"image_id": "fake_09", "in_distribution": false, "probs": {"akiec": 0.10, "bcc": 0.10, "bkl": 0.20, "df": 0.10, "mel": 0.20, "nv": 0.20, "vasc": 0.10}}},
+    {"case": "benign_keratosis_on_face", "age": 66, "site": "face", "expected": "monitor",
+     "c1": {"image_id": "fake_10", "probs": {"akiec": 0.03, "bcc": 0.01, "bkl": 0.80, "df": 0.01, "mel": 0.02, "nv": 0.12, "vasc": 0.01}}}
+  ]
+}
