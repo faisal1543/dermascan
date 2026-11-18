@@ -81,7 +81,7 @@ and the clinician still records a decision, with a reason (O3).
 
 ```mermaid
 flowchart LR
-    subgraph Offline["Offline: GPU (Daeta's laptop, RTX 5050; Kaggle as backup)"]
+    subgraph Offline["Offline: GPU on Kaggle (T4)"]
         H[("HAM10000<br/>not in git")] --> SP["Frozen split<br/>splits/splits.csv"]
         SP --> TR["perception: train<br/>on train split"]
         TR --> VC["Validation C1 CSV<br/>results/val_predictions/"]
