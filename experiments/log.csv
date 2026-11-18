@@ -1,2 +1,2 @@
 date,member,machine,run_name,backbone,config,val_balanced_acc,val_mel_recall,notes
-2026-11-19,Alfaisal,kaggle-t4,resnet18-baseline,resnet18,lr=0.0003 wd=0.01 drop=0.3 bs=64 size=224 epochs=18 best=12 weighted-CE seed=42,0.7957,0.8012,mel CI 0.73-0.85; argmax, no threshold tuning; Kaggle version 1
+2026-11-19,Alfaisal,kaggle-t4,resnet18-baseline,resnet18,lr=0.0003 wd=0.01 drop=0.3 bs=64 size=224 epochs=18 best=12 weighted-CE seed=42,0.7957,0.8012,mel CI 0.73-0.85; argmax with no threshold tuning; Kaggle version 1
