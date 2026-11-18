@@ -23,6 +23,6 @@ means redoing every result that came after it. Jira items refer to these by numb
 ## Compute
 
 - **Training:** GPU, on Kaggle Notebooks (free weekly quota) with Google Colab or a member's local
-  NVIDIA GPU as backup. Record the machine in `experiments/log.csv`.
+  NVIDIA GPU (RTX 5050 laptop; needs PyTorch >= 2.7 with CUDA 12.8) as backup. Record the machine in `experiments/log.csv`.
 - **Inference and the demo:** CPU. The 3-second latency target (objective O6) is measured on the
   demo laptop's CPU.

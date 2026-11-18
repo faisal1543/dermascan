@@ -1,8 +1,10 @@
 # Full environment (training + app), pinned for Python 3.10.
-# With an NVIDIA GPU, install the matching CUDA build of PyTorch first (see pytorch.org),
-# then the rest. On Kaggle, keep Kaggle's preinstalled torch/torchvision and install the others.
-torch==2.5.1
-torchvision==0.20.1
+# Local GPU laptop (RTX 5050, Blackwell sm_120) needs PyTorch >= 2.7 built with CUDA 12.8:
+#   pip install torch==2.7.1 torchvision==0.22.1 --index-url https://download.pytorch.org/whl/cu128
+# then: pip install -r requirements.txt
+# On Kaggle, keep Kaggle's preinstalled torch/torchvision and install the others.
+torch==2.7.1
+torchvision==0.22.1
 timm==1.0.12
 numpy==1.26.4
 pandas==2.2.3
