@@ -60,6 +60,18 @@ pip install -r requirements.txt
 pytest -q
 ```
 
+## Run the API (DERM-13)
+
+```
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
+
+Then open http://127.0.0.1:8000/docs to try `/health` and `/api/assess`. Until the real CNN is
+wired in (DERM-28), perception is **mocked**: the image's hash picks one of the 10 made-up cases in
+`reasoning/fake_cases.json`, and the real fuzzy layer turns it into a recommendation. The outputs
+are not model predictions.
+
 See `CONTRIBUTING.md` for the team workflow, `docs/ground-rules.md` for the rules every result
 depends on, and `CONTRIBUTIONS.md` for the contribution log.
 
