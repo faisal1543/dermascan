@@ -1,10 +1,10 @@
-# Light dependencies for CI (no PyTorch, so CI stays fast)
-numpy
-pandas
-scikit-learn
-scikit-fuzzy
-pillow
-fastapi
-python-multipart
-httpx
-pytest
+# Light dependencies for CI (no PyTorch, so CI stays fast). Keep in step with requirements.txt.
+numpy==1.26.4
+pandas==2.2.3
+scikit-learn==1.5.2
+scikit-fuzzy==0.5.0
+pillow==11.0.0
+fastapi==0.115.6
+python-multipart==0.0.20
+httpx==0.28.1
+pytest==8.3.4
