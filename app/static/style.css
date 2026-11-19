@@ -11,6 +11,7 @@ h1 { margin: 0; font-size: 22px; }
 .card { max-width: 760px; margin: 16px auto; padding: 20px 24px; background: var(--card); border: 1px solid var(--line); border-radius: 8px; }
 h2 { margin-top: 0; font-size: 18px; }
 h3 { font-size: 15px; margin: 20px 0 6px; }
+h4 { font-size: 13px; margin: 12px 0 4px; }
 label { display: block; font-weight: 600; font-size: 14px; margin: 12px 0 4px; }
 input, select, textarea { width: 100%; padding: 8px 10px; font: inherit; border: 1px solid var(--line); border-radius: 6px; }
 input[type=radio] { width: auto; margin-right: 6px; }

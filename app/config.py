@@ -2,7 +2,8 @@
 from __future__ import annotations
 
 MAX_IMAGE_BYTES = 10 * 1024 * 1024  # 10 MB (C3)
-ALLOWED_FORMATS = {"JPEG", "PNG"}  # checked on the decoded image, not the file name
+ALLOWED_FORMATS = {"JPEG", "PNG", "MPO"}  # checked on the decoded image, not the file name.
+# MPO is the multi-picture JPEG some phone cameras save; Pillow decodes its first frame like a JPEG.
 
 # The 15 HAM10000 body sites (C3). A missing value means "unknown".
 SITES = (

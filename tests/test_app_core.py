@@ -47,6 +47,17 @@ def test_jpeg_and_png_accepted(fmt):
     assert img.mode == "RGB" and img.size == (64, 48)
 
 
+def test_multi_picture_jpeg_from_phones_is_accepted():
+    """DERM-54: some phone cameras save MPO (multi-picture JPEG); the first frame is used."""
+    buf = io.BytesIO()
+    first, second = Image.new("RGB", (40, 30), (200, 10, 10)), Image.new("RGB", (40, 30), (10, 10, 200))
+    first.save(buf, "MPO", save_all=True, append_images=[second])
+    with Image.open(io.BytesIO(buf.getvalue())) as check:
+        assert check.format == "MPO"  # the test really builds an MPO file
+    img = validation.check_image(buf.getvalue())
+    assert img.mode == "RGB" and img.size == (40, 30)
+
+
 def test_other_formats_rejected_even_if_valid_images():
     assert error_code(validation.check_image, image_bytes("GIF")) == (400, "invalid_image")
     assert error_code(validation.check_image, image_bytes("BMP")) == (400, "invalid_image")

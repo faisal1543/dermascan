@@ -158,3 +158,40 @@ def test_review_screen_is_served():
     assert r.status_code == 200
     assert "DermaScan" in r.text and "not a diagnosis" in r.text
     assert client.get("/app.js").status_code == 200
+
+
+# --- DERM-54: hardening ------------------------------------------------------------------
+
+class _BrokenService:
+    """Stands in for a perception or reasoning failure we did not plan for."""
+    model_version = "mock-cnn-v0"
+    rules_version = "fuzzy-v0"
+
+    def assess(self, *args, **kwargs):
+        raise ValueError("bad C1 from the model")
+
+
+def test_unexpected_errors_use_the_error_shape():
+    broken = TestClient(create_app(service=_BrokenService()), raise_server_exceptions=False)
+    r = broken.post("/api/assess", files={"image": ("x.png", png(), "image/png")}, data={"clinician": "dr-a"})
+    assert r.status_code == 500
+    body = r.json()
+    assert body["error"] == "internal_error"
+    assert "bad C1" not in body["message"]  # no internal detail reaches the screen
+
+
+def test_phone_mpo_upload_is_assessed():
+    buf = io.BytesIO()
+    Image.new("RGB", (32, 32), (90, 60, 40)).save(buf, "MPO", save_all=True,
+                                                    append_images=[Image.new("RGB", (32, 32))])
+    r = assess(buf.getvalue(), name="IMG_0001.jpg")
+    assert r.status_code == 200, r.text
+
+
+def test_screen_uses_clinical_wording():
+    js = client.get("/app.js").text
+    assert "Suspected cancer pathway referral (NICE NG12)" in js
+    assert "seen within 2 weeks" not in js
+    assert "Actinic keratosis / intraepidermal carcinoma" in js
+    assert "revokeObjectURL" in js
+    assert 'id="rule-details"' in client.get("/").text
