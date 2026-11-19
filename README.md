@@ -47,7 +47,7 @@ splits/       frozen lesion-grouped split (W2)
 experiments/  log.csv — every training run
 results/      final tables and figures (W8)
 notebooks/    exported Kaggle notebooks
-docs/         contracts, meetings/, CHANGELOG.md, ai-use-log.md
+docs/         ground-rules.md, contracts.md, meetings/, CHANGELOG.md, ai-use-log.md
 data/         NOT committed — see data/README.md
 ```
 
@@ -82,4 +82,17 @@ python -m app.caselog --db caselog.db             # number of cases
 python -m app.caselog --db caselog.db --delete --yes
 ```
 
-See `CONTRIBUTING.md` for the team workflow and `CONTRIBUTIONS.md` for the contribution log.
+See `CONTRIBUTING.md` for the team workflow, `docs/ground-rules.md` for the rules every result
+depends on, and `CONTRIBUTIONS.md` for the contribution log.
+
+To confirm every image in the split decodes (run where HAM10000 is available, e.g. Kaggle):
+
+```
+python -m perception.check_images --images /kaggle/input --splits splits/splits.csv
+```
+
+## Licence
+
+Code: MIT (see `LICENSE`). The HAM10000 data (CC BY-NC 4.0), Google's Derm Foundation model
+(Health AI Developer Foundations terms) and any weights trained on HAM10000 keep their own terms
+and are not redistributed here.

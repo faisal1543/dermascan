@@ -28,3 +28,4 @@ results/**/*.pt
 Thumbs.db
 .vscode/
 .idea/
+runs/
