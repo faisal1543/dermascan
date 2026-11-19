@@ -1,25 +1,42 @@
-"""DermaScan backend (DERM-13): FastAPI app implementing contract C3.
+"""DermaScan backend (DERM-13, DERM-16): FastAPI app implementing contract C3, logging to C4.
 
 Run locally:
     uvicorn app.main:app --reload
-then open http://127.0.0.1:8000/docs for the interactive API page.
+then open http://127.0.0.1:8000/ for the review screen, or /docs for the interactive API page.
+The case log is a SQLite file, `caselog.db` in the working folder (set DERMASCAN_DB to change it).
 """
 from __future__ import annotations
+
+import os
+from pathlib import Path
 
 from fastapi import FastAPI, File, Form, Request, UploadFile
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 
+from app.caselog import CaseLog
 from app.config import MAX_IMAGE_BYTES
 from app.errors import ApiError
 from app.service import AssessmentService
 
+STATIC = Path(__file__).resolve().parent / "static"
 
-def create_app(service: AssessmentService | None = None) -> FastAPI:
-    service = service or AssessmentService()
+
+class Decision(BaseModel):
+    final_decision: str
+    override_reason: str | None = None
+    clinician: str
+
+
+def create_app(service: AssessmentService | None = None, db_path: Path | str | None = None) -> FastAPI:
+    if service is None:
+        db_path = db_path or os.environ.get("DERMASCAN_DB", "caselog.db")
+        service = AssessmentService(caselog=CaseLog(db_path))
     api = FastAPI(
         title="DermaScan API",
-        version="0.1.0",
+        version="0.2.0",
         description="Clinician decision support for dermoscopic images. Not a diagnosis.",
     )
 
@@ -50,6 +67,17 @@ def create_app(service: AssessmentService | None = None) -> FastAPI:
         result.pop("_log", None)
         return result
 
+    @api.post("/api/cases/{case_id}/decision")
+    def decide(case_id: str, decision: Decision):
+        return service.decide(case_id, decision.final_decision, decision.override_reason,
+                              decision.clinician)
+
+    @api.get("/api/cases/{case_id}")
+    def get_case(case_id: str):
+        return service.get_case(case_id)
+
+    # The review screen. Mounted last so the API routes above take priority.
+    api.mount("/", StaticFiles(directory=STATIC, html=True), name="screen")
     return api
 
 
