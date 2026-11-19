@@ -1,17 +1,17 @@
-# Full environment (training + app). Pin exact versions in W2 once everyone's setup works:
-#   pip freeze > requirements.lock.txt
-# With an NVIDIA GPU, install the CUDA build of PyTorch first (see pytorch.org), then the rest.
-torch
-torchvision
-timm
-numpy
-pandas
-scikit-learn
-scikit-fuzzy
-pillow
-matplotlib
-fastapi
-uvicorn
-python-multipart
-pytest
-httpx
+# Full environment (training + app), pinned for Python 3.10.
+# On Kaggle, keep Kaggle's preinstalled torch/torchvision and install the others.
+# On a local NVIDIA GPU, install the matching CUDA build of PyTorch first (see pytorch.org).
+torch==2.7.1
+torchvision==0.22.1
+timm==1.0.12
+numpy==1.26.4
+pandas==2.2.3
+scikit-learn==1.5.2
+scikit-fuzzy==0.5.0
+pillow==11.0.0
+matplotlib==3.9.4
+fastapi==0.115.6
+uvicorn==0.34.0
+python-multipart==0.0.20
+pytest==8.3.4
+httpx==0.28.1
