@@ -1,7 +1,9 @@
-"""DERM-13: the HTTP API (contract C3). Runs in CI, where FastAPI is installed."""
+"""DERM-13 / DERM-16: the HTTP API (contract C3) and case log (C4). Runs in CI, where FastAPI is installed."""
 from __future__ import annotations
 
 import io
+import tempfile
+from pathlib import Path
 
 import pytest
 from PIL import Image
@@ -12,7 +14,8 @@ from fastapi.testclient import TestClient  # noqa: E402
 from app.config import MAX_IMAGE_BYTES, NOTICE  # noqa: E402
 from app.main import create_app  # noqa: E402
 
-client = TestClient(create_app())
+DB = Path(tempfile.mkdtemp()) / "caselog.db"
+client = TestClient(create_app(db_path=DB))
 
 
 def png(size=(64, 48)) -> bytes:
@@ -86,3 +89,72 @@ def test_missing_image_is_a_malformed_request():
     r = client.post("/api/assess", data={"clinician": "dr-a"})
     assert r.status_code == 422
     assert r.json()["error"] == "invalid_request"
+
+
+# --- DERM-16: decisions and the case log -----------------------------------------------------
+
+def new_case(**form) -> dict:
+    r = assess(**form)
+    assert r.status_code == 200, r.text
+    return r.json()
+
+
+def decide(case_id, final, reason=None, clinician="dr-a"):
+    return client.post(f"/api/cases/{case_id}/decision",
+                       json={"final_decision": final, "override_reason": reason, "clinician": clinician})
+
+
+def test_every_assessment_is_logged_without_the_image():
+    case = new_case(age="50", site="trunk")
+    r = client.get(f"/api/cases/{case['case_id']}")
+    assert r.status_code == 200
+    row = r.json()
+    assert row["recommended_urgency"] == case["c2"]["urgency"]
+    assert row["final_decision"] is None and row["clinician"] == "dr-a"
+    assert len(row["image_sha256"]) == 64
+    assert "image" not in row and all(not str(v).startswith("iVBOR") for v in row.values())
+
+
+def test_confirming_needs_no_reason():
+    case = new_case()
+    rec = case["c2"]["urgency"]
+    if rec == "cannot_assess":
+        pytest.skip("this test image picked the cannot-assess case")
+    r = decide(case["case_id"], rec)
+    assert r.status_code == 200, r.text
+    assert r.json()["final_decision"] == rec and r.json()["decided_at"]
+
+
+def test_override_needs_a_reason_and_is_logged():
+    case = new_case()
+    other = "monitor" if case["c2"]["urgency"] != "monitor" else "urgent"
+    r = decide(case["case_id"], other)
+    assert r.status_code == 422 and r.json()["error"] == "override_reason_required"
+    r = decide(case["case_id"], other, reason="Lesion changed over 3 months")
+    assert r.status_code == 200
+    assert r.json()["override_reason"] == "Lesion changed over 3 months"
+
+
+def test_a_case_is_decided_once():
+    case = new_case()
+    other = "monitor" if case["c2"]["urgency"] != "monitor" else "urgent"
+    assert decide(case["case_id"], other, reason="first").status_code == 200
+    r = decide(case["case_id"], other, reason="second")
+    assert r.status_code == 409 and r.json()["error"] == "decision_already_recorded"
+
+
+def test_unknown_case_and_bad_decision():
+    assert client.get("/api/cases/nope").json()["error"] == "case_not_found"
+    assert decide("nope", "urgent", "x").status_code == 404
+    case = new_case()
+    r = decide(case["case_id"], "biopsy", reason="x")
+    assert r.status_code == 422 and r.json()["error"] == "invalid_decision"
+    r = client.post(f"/api/cases/{case['case_id']}/decision", json={"final_decision": "urgent"})
+    assert r.status_code == 422 and r.json()["error"] == "invalid_request"
+
+
+def test_review_screen_is_served():
+    r = client.get("/")
+    assert r.status_code == 200
+    assert "DermaScan" in r.text and "not a diagnosis" in r.text
+    assert client.get("/app.js").status_code == 200

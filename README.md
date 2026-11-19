@@ -67,9 +67,19 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
-Then open http://127.0.0.1:8000/docs to try `/health` and `/api/assess`. Until the real CNN is
+Then open http://127.0.0.1:8000/ for the review screen (DERM-16), or http://127.0.0.1:8000/docs
+to try the API directly. Until the real CNN is
 wired in (DERM-28), perception is **mocked**: the image's hash picks one of the 10 made-up cases in
 `reasoning/fake_cases.json`, and the real fuzzy layer turns it into a recommendation. The outputs
 are not model predictions.
+
+Every assessment and decision is written to a SQLite case log, `caselog.db` in the folder you run
+from (set `DERMASCAN_DB` to use another path). It stores the image hash, never the image. Check or
+delete it (proposal Section 6: deleted at project end):
+
+```
+python -m app.caselog --db caselog.db             # number of cases
+python -m app.caselog --db caselog.db --delete --yes
+```
 
 See `CONTRIBUTING.md` for the team workflow and `CONTRIBUTIONS.md` for the contribution log.
