@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DermaScan review screen</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div>
+      <h1>DermaScan</h1>
+      <p class="sub">Triage support for dermoscopic images</p>
+    </div>
+    <div class="reviewer" id="reviewer-bar" hidden>
+      Reviewer: <strong id="reviewer-name"></strong>
+      <button type="button" class="link" id="change-reviewer">Change</button>
+    </div>
+  </header>
+
+  <p class="banner" role="note">Decision support only, not a diagnosis. The clinician makes and owns every decision.</p>
+
+  <!-- 1. Reviewer ID at session start (no login: a stated limitation) -->
+  <section class="card" id="step-reviewer">
+    <h2>Who is reviewing?</h2>
+    <p class="hint">Your reviewer ID is saved with every decision in the case log.</p>
+    <form id="reviewer-form">
+      <label for="reviewer-input">Reviewer ID</label>
+      <input id="reviewer-input" maxlength="64" required autocomplete="off" placeholder="e.g. dr-aisha">
+      <button type="submit">Start session</button>
+    </form>
+  </section>
+
+  <!-- 2. Upload -->
+  <section class="card" id="step-upload" hidden>
+    <h2>New case</h2>
+    <form id="assess-form">
+      <label for="image">Dermoscopic image (JPEG or PNG, up to 10 MB)</label>
+      <input type="file" id="image" name="image" accept="image/jpeg,image/png" required>
+      <img id="preview" alt="Preview of the selected image" hidden>
+      <div class="row">
+        <div>
+          <label for="age">Age (optional)</label>
+          <input type="number" id="age" name="age" min="0" max="120" step="1" inputmode="numeric">
+        </div>
+        <div>
+          <label for="site">Body site (optional)</label>
+          <select id="site" name="site">
+            <option value="">Unknown</option>
+            <option>abdomen</option><option>acral</option><option>back</option><option>chest</option>
+            <option>ear</option><option>face</option><option>foot</option><option>genital</option>
+            <option>hand</option><option>lower extremity</option><option>neck</option>
+            <option>scalp</option><option>trunk</option><option>upper extremity</option>
+          </select>
+        </div>
+      </div>
+      <button type="submit" id="assess-button">Assess</button>
+    </form>
+    <p class="error" id="assess-error" role="alert" hidden></p>
+  </section>
+
+  <!-- 3. Result and decision -->
+  <section class="card" id="step-result" hidden>
+    <h2>Recommendation</h2>
+    <p class="mock" id="mock-note" hidden>Development build: perception is mocked, so these numbers are not model predictions.</p>
+    <div class="result-head">
+      <span class="badge" id="urgency-badge"></span>
+      <span id="urgency-meaning"></span>
+    </div>
+    <p class="score" id="score-line"></p>
+
+    <h3>Why</h3>
+    <ul id="reasons"></ul>
+
+    <details>
+      <summary>Model output</summary>
+      <p id="uncertainty-line"></p>
+      <table class="probs" id="probs-table" aria-label="Class probabilities"></table>
+      <p class="hint" id="heatmap-note"></p>
+      <img id="heatmap" alt="Grad-CAM heatmap" hidden>
+      <p class="hint" id="versions"></p>
+    </details>
+
+    <h3>Your decision</h3>
+    <form id="decision-form">
+      <fieldset>
+        <legend class="sr-only">Final decision</legend>
+        <label class="choice"><input type="radio" name="final" value="urgent"> Urgent referral</label>
+        <label class="choice"><input type="radio" name="final" value="routine"> Routine referral</label>
+        <label class="choice"><input type="radio" name="final" value="monitor"> Monitor (GP follow-up)</label>
+      </fieldset>
+      <label for="reason" id="reason-label">Reason</label>
+      <textarea id="reason" rows="2" maxlength="500"></textarea>
+      <p class="hint" id="reason-hint"></p>
+      <button type="submit">Save decision</button>
+    </form>
+    <p class="error" id="decision-error" role="alert" hidden></p>
+    <div class="saved" id="saved" hidden></div>
+    <button type="button" class="secondary" id="new-case" hidden>Start a new case</button>
+  </section>
+
+  <script src="app.js"></script>
+</body>
+</html>
