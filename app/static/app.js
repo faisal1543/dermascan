@@ -2,13 +2,13 @@
 "use strict";
 
 const MEANING = {
-  urgent: "Suspected-cancer referral (seen within 2 weeks)",
+  urgent: "Suspected cancer pathway referral (NICE NG12)",
   routine: "Non-urgent dermatology referral",
   monitor: "GP follow-up",
   cannot_assess: "Cannot assess this image. Refer for specialist review.",
 };
 const CLASS_NAMES = {
-  akiec: "Actinic keratosis", bcc: "Basal cell carcinoma", bkl: "Benign keratosis",
+  akiec: "Actinic keratosis / intraepidermal carcinoma", bcc: "Basal cell carcinoma", bkl: "Benign keratosis",
   df: "Dermatofibroma", mel: "Melanoma", nv: "Melanocytic nevus", vasc: "Vascular lesion",
 };
 
@@ -56,14 +56,26 @@ async function callApi(url, options) {
   return body;
 }
 
+// Uncertainty term from the reasoning layer (C2) when it reports one; until then the same
+// low / medium / high breakpoints as the rule file, so the screen and the rules agree.
+function uncertaintyLevel(c1, c2) {
+  const term = c2.inputs && c2.inputs.uncertainty_term;
+  if (term) return term;
+  const unc = c1.entropy;
+  return unc >= 0.55 ? "high" : unc >= 0.3 ? "medium" : "low";
+}
+
 // --- upload and assess ---------------------------------------------------------------
-$("image").addEventListener("change", () => {
-  const file = $("image").files[0];
+let previewUrl = null;
+function setPreview(file) {
   const img = $("preview");
-  if (!file) { img.hidden = true; return; }
-  img.src = URL.createObjectURL(file);
+  if (previewUrl) { URL.revokeObjectURL(previewUrl); previewUrl = null; } // free the old image
+  if (!file) { img.removeAttribute("src"); img.hidden = true; return; }
+  previewUrl = URL.createObjectURL(file);
+  img.src = previewUrl;
   img.hidden = false;
-});
+}
+$("image").addEventListener("change", () => setPreview($("image").files[0]));
 
 $("assess-form").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -98,22 +110,25 @@ function showResult(r) {
   $("urgency-meaning").textContent = MEANING[c2.urgency] || "";
   $("score-line").textContent = c2.score === null ? "" : `Urgency score ${c2.score} out of 100`;
 
+  // Plain-language reasons for the GP; rule codes and strengths go in "Model output" below.
+  const shown = c2.fired_rules.filter((rule) => !(rule.kind === "floor" && !rule.applied));
   const reasons = $("reasons");
   reasons.replaceChildren();
-  c2.fired_rules.forEach((rule) => {
-    if (rule.kind === "floor" && !rule.applied) return; // weak safety rules that did not change the result
+  shown.forEach((rule) => {
     const li = document.createElement("li");
-    li.textContent = rule.explanation + " ";
-    const tag = document.createElement("span");
-    tag.className = "tag";
-    tag.textContent = `(${rule.id}, strength ${rule.strength})`;
-    li.appendChild(tag);
+    li.textContent = rule.explanation;
     reasons.appendChild(li);
   });
+  const ruleList = $("rule-details");
+  ruleList.replaceChildren();
+  c2.fired_rules.forEach((rule) => {
+    const li = document.createElement("li");
+    const strength = typeof rule.strength === "number" ? rule.strength.toFixed(1) : rule.strength;
+    li.textContent = `${rule.id} (${rule.kind}${rule.kind === "floor" && !rule.applied ? ", not applied" : ""}): strength ${strength}`;
+    ruleList.appendChild(li);
+  });
 
-  const unc = c1.entropy;
-  const level = unc >= 0.55 ? "high" : unc >= 0.3 ? "medium" : "low";
-  $("uncertainty-line").textContent = `Uncertainty: ${level} (normalised entropy ${unc}).`;
+  $("uncertainty-line").textContent = `Uncertainty: ${uncertaintyLevel(c1, c2)} (normalised entropy ${c1.entropy}).`;
   const table = $("probs-table");
   table.replaceChildren();
   Object.entries(c1.probs).sort((a, b) => b[1] - a[1]).forEach(([cls, p]) => {
@@ -200,7 +215,7 @@ $("decision-form").addEventListener("submit", async (e) => {
 function resetCase() {
   current = null;
   $("assess-form").reset();
-  $("preview").hidden = true;
+  setPreview(null);
   $("step-result").hidden = true;
   showError($("assess-error"), "");
 }

@@ -7,6 +7,7 @@ The case log is a SQLite file, `caselog.db` in the working folder (set DERMASCAN
 """
 from __future__ import annotations
 
+import logging
 import os
 from pathlib import Path
 
@@ -22,6 +23,7 @@ from app.errors import ApiError
 from app.service import AssessmentService
 
 STATIC = Path(__file__).resolve().parent / "static"
+logger = logging.getLogger("dermascan.api")
 
 
 class Decision(BaseModel):
@@ -43,6 +45,14 @@ def create_app(service: AssessmentService | None = None, db_path: Path | str | N
     @api.exception_handler(ApiError)
     async def _api_error(_: Request, exc: ApiError):
         return JSONResponse(status_code=exc.status, content=exc.body())
+
+    @api.exception_handler(Exception)
+    async def _internal_error(_: Request, exc: Exception):
+        # Anything unexpected (for example bad C1 from the real model in DERM-28) still uses
+        # the one C3 error shape, and never leaks a stack trace to the screen.
+        logger.exception("unhandled error: %s", exc)
+        return JSONResponse(status_code=500, content={
+            "error": "internal_error", "message": "Something went wrong on the server. The case was not assessed."})
 
     @api.exception_handler(RequestValidationError)
     async def _bad_request(_: Request, exc: RequestValidationError):
